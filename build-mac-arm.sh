@@ -10,7 +10,7 @@ build-dep(){
 
   git clone https://chromium.googlesource.com/webm/libvpx.git --depth 1
   cd libvpx
-  ./configure --prefix=${INSTALL_DIR} --target=arm64-darwin20-gcc --enable-static --disable-shared --disable-examples --disable-tools --disable-unit-tests --disable-docs --disable-debug
+  ./configure --prefix=${INSTALL_DIR} --target=arm64-darwin20-gcc --enable-static --disable-shared --enable-vp8 --enable-vp9 --enable-vp9-highbitdepth --disable-examples --disable-tools --disable-unit-tests --disable-docs --disable-debug
   make -j$(sysctl -n hw.ncpu) install
   cd ..
 
@@ -100,6 +100,8 @@ compile_ffmpeg(){
   cd FFmpeg
   git fetch origin tag ${FFMPEG_TAG}
   git checkout ${FFMPEG_TAG}
+  pkg-config --print-errors --modversion vpx
+  pkg-config --print-errors --cflags --libs vpx
   ./configure \
   --prefix=${OUTPUT} \
   --extra-cflags="-I${INSTALL_DIR}/include" \

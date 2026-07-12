@@ -17,7 +17,7 @@ build-dep(){
 
   git clone https://chromium.googlesource.com/webm/libvpx.git --depth 1
   cd libvpx
-  CROSS=${CROSS_PREFIX} ./configure --prefix=${INSTALL_DIR} --target=x86_64-win64-gcc --enable-static --disable-shared --disable-examples --disable-tools --disable-unit-tests --disable-docs --disable-debug
+  CROSS=${CROSS_PREFIX} ./configure --prefix=${INSTALL_DIR} --target=x86_64-win64-gcc --enable-static --disable-shared --enable-vp8 --enable-vp9 --enable-vp9-highbitdepth --disable-examples --disable-tools --disable-unit-tests --disable-docs --disable-debug
   make -j$(nproc) install
   cd ..
 
@@ -40,7 +40,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 TCM
-  cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF -DENABLE_LIBNUMA=OFF -DCMAKE_TOOLCHAIN_FILE=toolchain-x86_64-w64-mingw32.cmake -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++" -DCMAKE_SHARED_LINKER_FLAGS="-static -static-libgcc -static-libstdc++" ../../source
+  cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF -DENABLE_LIBNUMA=OFF -DENABLE_ASSEMBLY=OFF -DCMAKE_TOOLCHAIN_FILE=toolchain-x86_64-w64-mingw32.cmake -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++" -DCMAKE_SHARED_LINKER_FLAGS="-static -static-libgcc -static-libstdc++" ../../source
   make -j$(nproc) install
   mkdir -p ${INSTALL_DIR}/lib/pkgconfig
   cat > ${INSTALL_DIR}/lib/pkgconfig/x265.pc <<EOF
@@ -52,8 +52,8 @@ includedir=\${prefix}/include
 Name: x265
 Description: H.265/HEVC encoder library
 Version: 4.1
-Libs: -L\${libdir} -lx265 -lstdc++ -lws2_32 -lole32 -luuid
-Libs.private: -lstdc++ -lws2_32 -lole32 -luuid
+Libs: -L\${libdir} -lx265 -lstdc++ -lwinpthread -lws2_32 -lole32 -luuid
+Libs.private: -lstdc++ -lwinpthread -lws2_32 -lole32 -luuid
 Cflags: -I\${includedir}
 EOF
   cd ../../..
@@ -118,6 +118,8 @@ compile_ffmpeg(){
 
   export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
   export PKG_CONFIG_LIBDIR=${INSTALL_DIR}/lib/pkgconfig
+  pkg-config --print-errors --modversion vpx
+  pkg-config --print-errors --cflags --libs vpx
 
   ./configure \
   --prefix=${OUTPUT} \
@@ -154,10 +156,9 @@ compile_ffmpeg(){
   --disable-debug \
   --enable-small \
   --enable-stripping \
-  --enable-lto \
   --cc=${CC} \
-  --extra-cflags="-O3 -flto -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables" \
-  --extra-ldflags="-Wl,-gc-sections -flto -Wl,--strip-all"
+  --extra-cflags="-O2 -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables" \
+  --extra-ldflags="-Wl,-gc-sections -Wl,--strip-all"
 
   make -j$(nproc)
   make install

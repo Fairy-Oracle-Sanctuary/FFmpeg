@@ -47,7 +47,7 @@
 
 - `libx264` 用于 H.264 软件编码。
 - `libx265` 用于 HEVC/H.265 软件编码，脚本会手动生成 `x265.pc`，确保 FFmpeg configure 能通过 `pkg-config` 检测到。
-- `libvpx_vp9` 用于 VP9 编码。
+- `libvpx_vp9` 用于 VP9 编码，脚本会在构建 `libvpx` 时显式启用 VP8/VP9；FFmpeg configure 选项名是 `libvpx_vp9`，命令行编码器名是 `libvpx-vp9`。
 - `libmp3lame` 用于 MP3 编码，脚本会手动生成 `libmp3lame.pc` 和 `lame.pc`，并给 FFmpeg configure 传入 `--extra-cflags` / `--extra-ldflags`，确保能检测到头文件和静态库。
 - `libopus` 用于 Opus 编码/解码，脚本会手动生成 `opus.pc`，包含静态链接所需的 `-lm` 和头文件路径，确保 FFmpeg configure 能通过 `pkg-config` 检测到。
 - `libfdk_aac` 用于高质量 AAC 编码。
@@ -560,7 +560,8 @@ ffmpeg -i input.mkv -c copy output.mp4
 - 网络协议已禁用，只支持本地文件和管道。
 - 该版本追求体积小和常用转码能力，不追求覆盖所有冷门格式。
 - `x265` 编译时间较长，属于正常现象。
-- Windows 交叉编译时 `x265` 需要 cmake toolchain 文件，脚本会自动生成，并强制使用 `-static -static-libgcc -static-libstdc++` 静态链接 MinGW 运行库，避免运行时缺少 `libstdc++` 入口点。
+- Windows 交叉编译时 `x265` 需要 cmake toolchain 文件，脚本会自动生成，并强制使用 `-static -static-libgcc -static-libstdc++` 静态链接 MinGW 运行库，避免运行时缺少 `libstdc++` 入口点。为避免 Windows 下 `libx265` 运行时访问冲突，脚本还关闭了 x265 汇编优化、显式链接 `winpthread`，并移除了 Windows FFmpeg 的 LTO。
 - 如果 FFmpeg configure 报 `x265 not found using pkg-config`，通常是缺少 `x265.pc`、静态链接参数不完整，或 `PKG_CONFIG_PATH` 未指向依赖目录；当前脚本已自动生成 `x265.pc` 并设置 `PKG_CONFIG_PATH`。Linux 下 `x265.pc` 已补充 `-lstdc++ -lpthread -lm -ldl`，并在构建 x265 时关闭 `libnuma`。
 - 如果 FFmpeg configure 报 `opus not found using pkg-config`，通常是缺少 `opus.pc`、静态链接参数不完整，或 `PKG_CONFIG_PATH` 未指向依赖目录；当前脚本已自动生成 `opus.pc`，并设置 `PKG_CONFIG_PATH`。
 - 如果 FFmpeg configure 报 `libmp3lame >= 3.98.3 not found`，通常是 FFmpeg 检测不到 `lame/lame.h` 或 `libmp3lame.a`；当前脚本已在 configure 阶段传入外部依赖的 include/lib 路径，并自动生成 `libmp3lame.pc` 与 `lame.pc`。
+- 如果运行时提示 `Unknown encoder 'libvpx-vp9'`，说明产物里没有编进 VP9 编码器；当前脚本已显式启用 `libvpx` 的 VP8/VP9，并在 FFmpeg configure 前打印 `pkg-config vpx` 诊断信息。

@@ -15,7 +15,7 @@ build-dep(){
 
   git clone https://chromium.googlesource.com/webm/libvpx.git --depth 1
   cd libvpx
-  ./configure --prefix=${INSTALL_DIR} --target=x86_64-linux-gcc --enable-static --disable-shared --disable-examples --disable-tools --disable-unit-tests --disable-docs --disable-debug
+  ./configure --prefix=${INSTALL_DIR} --target=x86_64-linux-gcc --enable-static --disable-shared --enable-vp8 --enable-vp9 --enable-vp9-highbitdepth --disable-examples --disable-tools --disable-unit-tests --disable-docs --disable-debug
   make -j$(nproc) install
   cd ..
 
@@ -108,6 +108,8 @@ compile_ffmpeg(){
   pkg-config --print-errors --cflags --libs opus
   pkg-config --print-errors --modversion x265
   pkg-config --print-errors --cflags --libs x265
+  pkg-config --print-errors --modversion vpx
+  pkg-config --print-errors --cflags --libs vpx
 
   ./configure \
   --prefix=${OUTPUT} \
