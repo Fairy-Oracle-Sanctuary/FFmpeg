@@ -57,6 +57,7 @@ Version: 3.100
 Libs: -L\${libdir} -lmp3lame
 Cflags: -I\${includedir}
 EOF
+  cp ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ${INSTALL_DIR}/lib/pkgconfig/lame.pc
   cd ..
 
   cd ${BASE}
@@ -72,6 +73,8 @@ compile_ffmpeg(){
   git checkout ${FFMPEG_TAG}
   ./configure \
   --prefix=${OUTPUT} \
+  --extra-cflags="-I${INSTALL_DIR}/include" \
+  --extra-ldflags="-L${INSTALL_DIR}/lib" \
   --arch=arm64 \
   --target-os=darwin \
   --disable-everything \

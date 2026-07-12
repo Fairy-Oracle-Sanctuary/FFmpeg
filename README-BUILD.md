@@ -48,7 +48,7 @@
 - `libx264` 用于 H.264 软件编码。
 - `libx265` 用于 HEVC/H.265 软件编码。
 - `libvpx_vp9` 用于 VP9 编码。
-- `libmp3lame` 用于 MP3 编码，脚本会手动生成 `libmp3lame.pc`，确保 FFmpeg configure 能通过 `pkg-config` 检测到。
+- `libmp3lame` 用于 MP3 编码，脚本会手动生成 `libmp3lame.pc` 和 `lame.pc`，并给 FFmpeg configure 传入 `--extra-cflags` / `--extra-ldflags`，确保能检测到头文件和静态库。
 - `libopus` 用于 Opus 编码/解码。
 - `libfdk_aac` 用于高质量 AAC 编码。
 - `pcm_s16le` 是 FFmpeg 原生 PCM 编解码器，已启用。
@@ -559,4 +559,4 @@ ffmpeg -i input.mkv -c copy output.mp4
 - 该版本追求体积小和常用转码能力，不追求覆盖所有冷门格式。
 - `x265` 编译时间较长，属于正常现象。
 - Windows 交叉编译时 `x265` 需要 cmake toolchain 文件，脚本会自动生成。
-- 如果 FFmpeg configure 报 `libmp3lame >= 3.98.3 not found`，通常是缺少 `libmp3lame.pc`；当前脚本已在安装 LAME 后自动生成该文件。
+- 如果 FFmpeg configure 报 `libmp3lame >= 3.98.3 not found`，通常是 FFmpeg 检测不到 `lame/lame.h` 或 `libmp3lame.a`；当前脚本已在 configure 阶段传入外部依赖的 include/lib 路径，并自动生成 `libmp3lame.pc` 与 `lame.pc`。
