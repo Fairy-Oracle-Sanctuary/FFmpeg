@@ -24,17 +24,17 @@ compile_ffmpeg(){
   --disable-everything \
   --disable-programs \
   --enable-ffmpeg \
-  --enable-encoders \
-  --enable-decoders \
-  --enable-muxers \
-  --enable-demuxers \
-  --enable-parsers \
-  --enable-bsfs \
-  --enable-filters \
-  --enable-protocols \
   --disable-avdevice \
   --disable-postproc \
   --disable-network \
+  --enable-protocol=file,pipe \
+  --enable-muxer=mp4,mov,matroska,webm,flv,avi,mpegts,rawvideo,wav,mp3,ogg,adts,ac3,flac,null \
+  --enable-demuxer=mov,matroska,flv,avi,mpegts,mpegvideo,rawvideo,wav,mp3,ogg,aac,ac3,flac,concat,image2 \
+  --enable-encoder=h264_videotoolbox,hevc_videotoolbox,mpeg4,mpeg2video,flv,h263,h263p,mjpeg,ffv1,png,bmp,aac,ac3,eac3,flac,opus,pcm_s16le,mp2,vorbis,wavpack,ass,ssa,subrip,srt,webvtt \
+  --enable-decoder=h264,hevc,mpeg4,mpeg2video,mpegvideo,vp9,vp8,av1,flv,h263,mjpeg,png,bmp,aac,ac3,eac3,mp3,flac,opus,vorbis,pcm_s16le,mp2,wavpack,ass,ssa,subrip,srt,webvtt \
+  --enable-parser=h264,hevc,mpeg4video,mpegvideo,vp9,vp8,av1,aac,ac3,flac,opus,mpegaudio,vorbis,mjpeg,png \
+  --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb,aac_adtstoasc,extract_extradata,null \
+  --enable-filter=buffer,buffersink,abuffer,abuffersink,scale,fps,format,null,crop,transpose,vflip,hflip,pad,setpts,setsar,setdar,yadif,aresample,aformat,anull,volume,atempo \
   --enable-videotoolbox \
   --enable-hwaccel=h264_videotoolbox,hevc_videotoolbox \
   --disable-doc \
