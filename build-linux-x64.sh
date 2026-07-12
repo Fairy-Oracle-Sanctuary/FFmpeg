@@ -16,15 +16,20 @@ build-dep(){
   make PREFIX=${INSTALL_DIR} install
   cd ..
 
-  git clone https://code.videolan.org/videolan/x264.git -b ${X264_BRANCH} --depth 1
-  cd x264
-  ./configure --prefix=${INSTALL_DIR} --enable-static --disable-cli
-  make -j$(nproc) install
-  cd ..
-  git clone https://bitbucket.org/multicoreware/x265_git.git -b ${X265_VER} --depth 1
-  cd x265_git/source
-  cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DCMAKE_BUILD_TYPE=Release ..
-  make -j$(nproc) install
+  if [[ "${BUILD_MODE}" == "gpl" ]]; then
+    git clone https://code.videolan.org/videolan/x264.git -b ${X264_BRANCH} --depth 1
+    cd x264
+    ./configure --prefix=${INSTALL_DIR} --enable-static --disable-cli
+    make -j$(nproc) install
+    cd ..
+    git clone https://bitbucket.org/multicoreware/x265_git.git --depth 1
+    cd x265_git
+    git fetch origin tag ${X265_VER}
+    git checkout ${X265_VER}
+    cd source
+    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DCMAKE_BUILD_TYPE=Release ..
+    make -j$(nproc) install
+  fi
   cd ${BASE}
 }
 
@@ -34,9 +39,9 @@ compile_ffmpeg(){
   cd FFmpeg
   git fetch origin tag ${FFMPEG_TAG}
   git checkout ${FFMPEG_TAG}
+  export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
   EXTRA_CONF=""
   if [[ "${BUILD_MODE}" == "gpl" ]];then
-    export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
     EXTRA_CONF="--enable-gpl --enable-libx264 --enable-libx265"
   fi
 

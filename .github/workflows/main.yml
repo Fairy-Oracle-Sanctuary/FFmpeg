@@ -1,4 +1,4 @@
-name: Build‑FFmpeg‑With‑NVENC‑AMF‑VTB
+name: Build-FFmpeg-With-NVENC-AMF-VTB
 on:
   push:
     branches: ["main"]
@@ -17,11 +17,8 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y build-essential yasm nasm pkg-config libva-dev git upx cmake
-          git clone --depth 1 https://github.com/FFmpeg/nv-codec-headers.git /tmp/nv-codec-headers
-          cd /tmp/nv-codec-headers && sudo make install
 
-      - name: Build x264/x265 if GPL
-        if: ${{ matrix.mode == 'gpl' }}
+      - name: Build deps (nv-codec/x264/x265)
         env:
           BUILD_MODE: ${{ matrix.mode }}
         run: |
@@ -31,7 +28,9 @@ jobs:
       - name: Compile ffmpeg
         env:
           BUILD_MODE: ${{ matrix.mode }}
-        run: ./build-linux-x64.sh compile
+        run: |
+          chmod +x ./build-linux-x64.sh
+          ./build-linux-x64.sh compile
 
       - name: Strip and UPX
         run: |
@@ -58,11 +57,8 @@ jobs:
       - name: Install mingw-w64
         run: |
           sudo apt install -y mingw-w64 build-essential yasm nasm git upx pkg-config
-          git clone --depth 1 https://github.com/FFmpeg/nv-codec-headers.git /tmp/nv-codec-headers
-          cd /tmp/nv-codec-headers && sudo make install
 
-      - name: Build x264 deps (GPL only)
-        if: ${{ matrix.mode == 'gpl' }}
+      - name: Build deps (nv-codec/AMF/x264)
         env:
           BUILD_MODE: ${{ matrix.mode }}
         run: |
@@ -100,8 +96,7 @@ jobs:
       - name: Install dependencies
         run: brew install yasm nasm pkg-config cmake
 
-      - name: Build x264/x265 if GPL
-        if: ${{ matrix.mode == 'gpl' }}
+      - name: Build deps (x264/x265)
         env:
           BUILD_MODE: ${{ matrix.mode }}
         run: |
@@ -115,7 +110,7 @@ jobs:
           chmod +x ./build-mac-arm.sh
           ./build-mac-arm.sh compile
 
-      - name: Strip (macOS disable UPX)
+      - name: Strip
         run: strip ./output-mac-arm64-${{ matrix.mode }}/ffmpeg
 
       - name: Pack

@@ -35,9 +35,9 @@ compile_ffmpeg(){
   git fetch origin tag ${FFMPEG_TAG}
   git checkout ${FFMPEG_TAG}
 
+  export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
   EXTRA_CONF=""
   if [[ "${BUILD_MODE}" == "gpl" ]]; then
-    export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
     EXTRA_CONF="--enable-gpl --enable-libx264"
   fi
 
