@@ -54,8 +54,12 @@ jobs:
         run: |
           chmod +x ./build-win-x64.sh
           ./build-win-x64.sh build-dep
+          # 安装到 mingw sysroot，顺便验证是否生效
           cd build_win/nv-codec-headers
           sudo make PREFIX=/usr/x86_64-w64-mingw32 install
+          echo "=== checking pkg-config ==="
+          x86_64-w64-mingw32-pkg-config --modversion ffnvcodec
+          ls -la /usr/x86_64-w64-mingw32/lib/pkgconfig/ffnvcodec.pc
 
       - name: Compile windows-ffmpeg
         run: |
