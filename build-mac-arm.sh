@@ -41,25 +41,29 @@ compile_ffmpeg(){
   --prefix=${OUTPUT} \
   --arch=arm64 \
   --target-os=darwin \
-  --disable-all \
-  --enable-programs=ffmpeg \
-  --disable-ffprobe \
-  --disable-ffplay \
-  --enable-muxer=mp4,mkv \
-  --enable-demuxer=mp4,h264,hevc \
-  --enable-decoder=h264,hevc,aac,opus \
-  --enable-encoder=aac,opus \
-  --enable-filter=scale,crop,pad,fade \
-  --enable-protocol=file \
+  --disable-everything \
+  --disable-programs \
+  --enable-ffmpeg \
+  --enable-encoders \
+  --enable-decoders \
+  --enable-muxers \
+  --enable-demuxers \
+  --enable-parsers \
+  --enable-bsfs \
+  --enable-filters \
+  --enable-protocols \
+  --disable-avdevice \
+  --disable-postproc \
   --disable-network \
   --enable-videotoolbox \
   --enable-hwaccel=h264_videotoolbox,hevc_videotoolbox \
   --disable-doc \
   --disable-debug \
-  --enable-stripping \
   --enable-small \
-  --extra-cflags="-Os -ffunction-sections -fdata-sections" \
-  --extra-ldflags="-Wl,-gc-sections" \
+  --enable-stripping \
+  --enable-lto \
+  --extra-cflags="-O3 -flto -fomit-frame-pointer -ffunction-sections -fdata-sections" \
+  --extra-ldflags="-Wl,-dead_strip -flto" \
   ${EXTRA}
 
   make -j$(sysctl -n hw.ncpu)

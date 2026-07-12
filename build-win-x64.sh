@@ -37,27 +37,31 @@ compile_ffmpeg(){
   --cross-prefix=${CROSS_PREFIX} \
   --arch=x86_64 \
   --target-os=mingw64 \
-  --disable-all \
-  --enable-programs=ffmpeg \
-  --disable-ffprobe \
-  --disable-ffplay \
-  --enable-muxer=mp4,mkv \
-  --enable-demuxer=mp4,h264,hevc \
-  --enable-decoder=h264,hevc,aac,opus \
-  --enable-encoder=aac,opus \
-  --enable-filter=scale,crop,pad,fade \
-  --enable-protocol=file \
+  --disable-everything \
+  --disable-programs \
+  --enable-ffmpeg \
+  --enable-encoders \
+  --enable-decoders \
+  --enable-muxers \
+  --enable-demuxers \
+  --enable-parsers \
+  --enable-bsfs \
+  --enable-filters \
+  --enable-protocols \
+  --disable-avdevice \
+  --disable-postproc \
   --disable-network \
   --enable-nvenc --enable-nvdec \
   --enable-amf \
   --enable-hwaccel=h264_cuvid,hevc_cuvid \
   --disable-doc \
   --disable-debug \
-  --enable-stripping \
   --enable-small \
+  --enable-stripping \
+  --enable-lto \
   --cc=${CC} \
-  --extra-cflags="-Os -ffunction-sections -fdata-sections -I${BASE}/build_win/AMF/amf/public/include" \
-  --extra-ldflags="-Wl,-gc-sections" \
+  --extra-cflags="-O3 -flto -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables -I${BASE}/build_win/AMF/amf/public/include" \
+  --extra-ldflags="-Wl,-gc-sections -flto -Wl,--strip-all" \
   ${EXTRA_CONF}
 
   make -j$(nproc)
