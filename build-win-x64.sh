@@ -109,6 +109,12 @@ EOF
   cp ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ${INSTALL_DIR}/lib/pkgconfig/lame.pc
   cd ..
 
+  git clone https://github.com/madler/zlib.git --depth 1
+  cd zlib
+  CC=${CC} AR=${CROSS_PREFIX}ar RANLIB=${CROSS_PREFIX}ranlib ./configure --prefix=${INSTALL_DIR} --static
+  make -j$(nproc) install
+  cd ..
+
   cd ..
   export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
 }
@@ -158,7 +164,8 @@ compile_ffmpeg(){
   --enable-libopus \
   --enable-libfdk-aac \
   --enable-nvenc --enable-nvdec \
-  --enable-hwaccel=h264_cuvid,hevc_cuvid \
+  --enable-hwaccel=h264_nvdec,hevc_nvdec,h264_dxva2,hevc_dxva2,h264_d3d11va,hevc_d3d11va \
+  --enable-zlib \
   --disable-doc \
   --disable-debug \
   --enable-small \

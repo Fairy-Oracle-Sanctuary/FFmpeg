@@ -93,6 +93,12 @@ EOF
   cp ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ${INSTALL_DIR}/lib/pkgconfig/lame.pc
   cd ..
 
+  git clone https://github.com/madler/zlib.git --depth 1
+  cd zlib
+  ./configure --prefix=${INSTALL_DIR} --static
+  make -j$(nproc) install
+  cd ..
+
   cd ${BASE}
 }
 
@@ -141,7 +147,8 @@ compile_ffmpeg(){
   --enable-libfdk-aac \
   --enable-nvenc --enable-nvdec \
   --enable-vaapi \
-  --enable-hwaccel=h264_vaapi,hevc_vaapi,h264_cuvid,hevc_cuvid \
+  --enable-hwaccel=h264_vaapi,hevc_vaapi,h264_nvdec,hevc_nvdec \
+  --enable-zlib \
   --disable-doc \
   --disable-debug \
   --enable-small \

@@ -45,7 +45,7 @@ compile_ffmpeg(){
   --disable-postproc \
   --disable-network \
   --enable-nvenc --enable-nvdec \
-  --enable-hwaccel=h264_cuvid,hevc_cuvid \
+  --enable-hwaccel=h264_nvdec,hevc_nvdec,h264_dxva2,hevc_dxva2,h264_d3d11va,hevc_d3d11va \
   --disable-doc \
   --disable-debug \
   --enable-small \
