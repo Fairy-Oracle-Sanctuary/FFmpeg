@@ -3,24 +3,16 @@ set -e
 FFMPEG_TAG="n7.1"
 BASE=$(pwd)
 INSTALL_DIR=${BASE}/win_dep
-OUTPUT=${BASE}/output-win64-${BUILD_MODE}
+OUTPUT=${BASE}/output-win64
 
 build-dep(){
   mkdir -p build_win && cd build_win
 
-  # nv-codec-headers (required for NVENC/NVDEC)
   git clone https://github.com/FFmpeg/nv-codec-headers.git --depth 1
   cd nv-codec-headers
   make PREFIX=${INSTALL_DIR} install
   cd ..
 
-  if [[ "${BUILD_MODE}" == "gpl" ]]; then
-    git clone https://code.videolan.org/videolan/x264.git --depth 1
-    cd x264
-    ./configure --prefix=${INSTALL_DIR} --enable-static --disable-cli
-    make -j$(nproc) install
-    cd ..
-  fi
   git clone https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git --depth 1
   cd ..
   export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
@@ -34,10 +26,6 @@ compile_ffmpeg(){
   git checkout ${FFMPEG_TAG}
 
   export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
-  EXTRA_CONF=""
-  if [[ "${BUILD_MODE}" == "gpl" ]]; then
-    EXTRA_CONF="--enable-gpl --enable-libx264"
-  fi
 
   ./configure \
   --prefix=${OUTPUT} \
@@ -66,8 +54,7 @@ compile_ffmpeg(){
   --enable-stripping \
   --enable-lto \
   --extra-cflags="-O3 -flto -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables -I${BASE}/build_win/AMF/amf/public/include" \
-  --extra-ldflags="-Wl,-gc-sections -flto -Wl,--strip-all" \
-  ${EXTRA_CONF}
+  --extra-ldflags="-Wl,-gc-sections -flto -Wl,--strip-all"
 
   make -j$(nproc)
   make install

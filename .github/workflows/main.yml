@@ -7,9 +7,6 @@ on:
 jobs:
   build-linux-x64:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        mode: [lgpl, gpl]
     steps:
       - uses: actions/checkout@v4
 
@@ -18,39 +15,32 @@ jobs:
           sudo apt update
           sudo apt install -y build-essential yasm nasm pkg-config libva-dev git upx cmake
 
-      - name: Build deps (nv-codec/x264/x265)
-        env:
-          BUILD_MODE: ${{ matrix.mode }}
+      - name: Build deps
         run: |
           chmod +x ./build-linux-x64.sh
           ./build-linux-x64.sh build-dep
 
       - name: Compile ffmpeg
-        env:
-          BUILD_MODE: ${{ matrix.mode }}
         run: |
           chmod +x ./build-linux-x64.sh
           ./build-linux-x64.sh compile
 
       - name: Strip and UPX
         run: |
-          strip ./output-linux-x64-${{ matrix.mode }}/ffmpeg
-          upx --best ./output-linux-x64-${{ matrix.mode }}/ffmpeg || true
+          strip ./output-linux-x64/ffmpeg
+          upx --best ./output-linux-x64/ffmpeg || true
 
       - name: Archive
-        run: tar -zcvf ffmpeg-linux-x64-${{ matrix.mode }}.tar.gz -C ./output-linux-x64-${{ matrix.mode }} .
+        run: tar -zcvf ffmpeg-linux-x64.tar.gz -C ./output-linux-x64 .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg-linux-x64-${{ matrix.mode }}
-          path: ffmpeg-linux-x64-${{ matrix.mode }}.tar.gz
+          name: ffmpeg-linux-x64
+          path: ffmpeg-linux-x64.tar.gz
 
   build-win-x64:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        mode: [lgpl, gpl]
     steps:
       - uses: actions/checkout@v4
 
@@ -58,65 +48,54 @@ jobs:
         run: |
           sudo apt install -y mingw-w64 build-essential yasm nasm git upx pkg-config
 
-      - name: Build deps (nv-codec/AMF/x264)
-        env:
-          BUILD_MODE: ${{ matrix.mode }}
+      - name: Build deps
         run: |
           chmod +x ./build-win-x64.sh
           ./build-win-x64.sh build-dep
 
       - name: Compile windows-ffmpeg
-        env:
-          BUILD_MODE: ${{ matrix.mode }}
         run: |
           chmod +x ./build-win-x64.sh
           ./build-win-x64.sh compile
 
       - name: Strip + UPX
         run: |
-          x86_64-w64-mingw32-strip ./output-win64-${{ matrix.mode }}/ffmpeg.exe
-          upx --best ./output-win64-${{ matrix.mode }}/ffmpeg.exe || true
+          x86_64-w64-mingw32-strip ./output-win64/ffmpeg.exe
+          upx --best ./output-win64/ffmpeg.exe || true
 
       - name: Package
-        run: zip -r ffmpeg-win-x64-${{ matrix.mode }}.zip ./output-win64-${{ matrix.mode }}/*
+        run: zip -r ffmpeg-win-x64.zip ./output-win64/*
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg-win-x64-${{ matrix.mode }}
-          path: ffmpeg-win-x64-${{ matrix.mode }}.zip
+          name: ffmpeg-win-x64
+          path: ffmpeg-win-x64.zip
 
   build-mac-arm64:
     runs-on: macos-14
-    strategy:
-      matrix:
-        mode: [lgpl, gpl]
     steps:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: brew install yasm nasm pkg-config cmake
 
-      - name: Build deps (x264/x265)
-        env:
-          BUILD_MODE: ${{ matrix.mode }}
+      - name: Build deps
         run: |
           chmod +x ./build-mac-arm.sh
           ./build-mac-arm.sh build-dep
 
       - name: Compile mac-arm64
-        env:
-          BUILD_MODE: ${{ matrix.mode }}
         run: |
           chmod +x ./build-mac-arm.sh
           ./build-mac-arm.sh compile
 
       - name: Strip
-        run: strip ./output-mac-arm64-${{ matrix.mode }}/ffmpeg
+        run: strip ./output-mac-arm64/ffmpeg
 
       - name: Pack
-        run: tar -zcvf ffmpeg-mac-arm64-${{ matrix.mode }}.tar.gz -C ./output-mac-arm64-${{ matrix.mode }} .
+        run: tar -zcvf ffmpeg-mac-arm64.tar.gz -C ./output-mac-arm64 .
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ffmpeg-mac-arm64-${{ matrix.mode }}
-          path: ffmpeg-mac-arm64-${{ matrix.mode }}.tar.gz
+          name: ffmpeg-mac-arm64
+          path: ffmpeg-mac-arm64.tar.gz
