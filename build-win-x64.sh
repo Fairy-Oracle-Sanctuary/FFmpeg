@@ -40,7 +40,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 TCM
-  cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF -DCMAKE_TOOLCHAIN_FILE=toolchain-x86_64-w64-mingw32.cmake ../../source
+  cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF -DENABLE_LIBNUMA=OFF -DCMAKE_TOOLCHAIN_FILE=toolchain-x86_64-w64-mingw32.cmake -DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++" -DCMAKE_SHARED_LINKER_FLAGS="-static -static-libgcc -static-libstdc++" ../../source
   make -j$(nproc) install
   mkdir -p ${INSTALL_DIR}/lib/pkgconfig
   cat > ${INSTALL_DIR}/lib/pkgconfig/x265.pc <<EOF
@@ -52,8 +52,8 @@ includedir=\${prefix}/include
 Name: x265
 Description: H.265/HEVC encoder library
 Version: 4.1
-Libs: -L\${libdir} -lx265 -lstdc++
-Libs.private: -lstdc++
+Libs: -L\${libdir} -lx265 -lstdc++ -lws2_32 -lole32 -luuid
+Libs.private: -lstdc++ -lws2_32 -lole32 -luuid
 Cflags: -I\${includedir}
 EOF
   cd ../../..
@@ -122,7 +122,7 @@ compile_ffmpeg(){
   ./configure \
   --prefix=${OUTPUT} \
   --extra-cflags="-I${INSTALL_DIR}/include" \
-  --extra-ldflags="-L${INSTALL_DIR}/lib" \
+  --extra-ldflags="-L${INSTALL_DIR}/lib -static -static-libgcc -static-libstdc++" \
   --cross-prefix=${CROSS_PREFIX} \
   --arch=x86_64 \
   --target-os=mingw64 \
