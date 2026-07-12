@@ -2,7 +2,8 @@
 set -e
 FFMPEG_TAG="n7.1"
 CROSS_PREFIX="x86_64-w64-mingw32-"
-CC=${CROSS_PREFIX}gcc
+CC=${CROSS_PREFIX}gcc-posix
+CXX=${CROSS_PREFIX}g++-posix
 BASE=$(pwd)
 INSTALL_DIR=${BASE}/win_dep
 OUTPUT=${BASE}/output-win64
@@ -19,6 +20,9 @@ build-dep(){
   cd libvpx
   CROSS=${CROSS_PREFIX} ./configure --prefix=${INSTALL_DIR} --target=x86_64-win64-gcc --enable-static --disable-shared --enable-vp8 --enable-vp9 --enable-vp9-highbitdepth --disable-examples --disable-tools --disable-unit-tests --disable-docs --disable-debug
   make -j$(nproc) install
+  if [ -f ${INSTALL_DIR}/lib/pkgconfig/vpx.pc ]; then
+    sed -i 's/^Libs.private:.*/Libs.private: -lwinpthread -lm/' ${INSTALL_DIR}/lib/pkgconfig/vpx.pc
+  fi
   cd ..
 
   git clone https://code.videolan.org/videolan/x264.git --depth 1
@@ -32,8 +36,8 @@ build-dep(){
   cat > toolchain-x86_64-w64-mingw32.cmake <<'TCM'
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_SYSTEM_PROCESSOR x86_64)
-set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc)
-set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++)
+set(CMAKE_C_COMPILER x86_64-w64-mingw32-gcc-posix)
+set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++-posix)
 set(CMAKE_RC_COMPILER x86_64-w64-mingw32-windres)
 set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -125,9 +129,12 @@ compile_ffmpeg(){
   --prefix=${OUTPUT} \
   --extra-cflags="-I${INSTALL_DIR}/include" \
   --extra-ldflags="-L${INSTALL_DIR}/lib -static -static-libgcc -static-libstdc++" \
+  --extra-libs="-lstdc++ -lwinpthread" \
   --cross-prefix=${CROSS_PREFIX} \
   --arch=x86_64 \
   --target-os=mingw64 \
+  --enable-pthreads \
+  --disable-w32threads \
   --disable-everything \
   --disable-programs \
   --enable-ffmpeg \
@@ -157,8 +164,12 @@ compile_ffmpeg(){
   --enable-small \
   --enable-stripping \
   --cc=${CC} \
+  --cxx=${CXX} \
   --extra-cflags="-O2 -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables" \
   --extra-ldflags="-Wl,-gc-sections -Wl,--strip-all"
+
+  grep -q '^#define CONFIG_LIBX265_ENCODER 1$' config.h
+  grep -q '^#define CONFIG_LIBVPX_VP9_ENCODER 1$' config.h
 
   make -j$(nproc)
   make install
