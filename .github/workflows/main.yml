@@ -45,7 +45,7 @@ jobs:
 
       - name: Install mingw-w64
         run: |
-          sudo apt install -y mingw-w64 build-essential yasm nasm git upx pkg-config cmake autoconf automake libtool
+          sudo apt install -y mingw-w64 build-essential yasm nasm git pkg-config cmake autoconf automake libtool
 
       - name: Build deps
         run: |
@@ -64,10 +64,9 @@ jobs:
           chmod +x ./build-win-x64.sh
           ./build-win-x64.sh compile
 
-      - name: Strip + UPX
+      - name: Strip
         run: |
           x86_64-w64-mingw32-strip ./output-win64/bin/ffmpeg.exe
-          upx --best ./output-win64/bin/ffmpeg.exe || true
 
       - uses: actions/upload-artifact@v4
         with:

@@ -548,7 +548,7 @@ ffmpeg -i input.mkv -c copy output.mp4
 
 - GitHub Actions 每次运行都是全新虚拟机，不需要手动清理上次环境。
 - Windows x64 在 Ubuntu 上交叉编译（`mingw-w64`），不是在 Windows runner 上构建。
-- workflow 中已配置 `strip` 和 `upx` 压缩（Windows/Linux），进一步减小体积。
+- workflow 中 Linux 已配置 `strip` 和 `upx` 压缩，Windows 仅执行 `strip`；Windows 版不使用 `upx`，避免压缩后的 `ffmpeg.exe` 启动即崩溃。
 - `upload-artifact` 下载时会自动变成 zip，workflow 直接上传二进制文件，避免 zip 内再套 zip/tar.gz。
 - 如果 Action 报错 `autoreconf: command not found`，说明构建工具未装全，确认 workflow 的 Install 步骤包含 `autoconf automake libtool`。
 - 如果 Linux 报 `vaapi requested but not found`，确认安装了 `libva-dev` 和 `libdrm-dev`，并且不要用 `PKG_CONFIG_LIBDIR` 覆盖系统 pkg-config 搜索路径。
