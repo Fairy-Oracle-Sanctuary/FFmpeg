@@ -31,6 +31,10 @@ build-dep(){
     sed -i.bak 's/CMP0054  *OLD)/CMP0054 NEW)/' CMakeLists.txt
     cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_SHARED=OFF -DENABLE_ASSEMBLY=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
     make -j$(sysctl -n hw.ncpu) install
+    mkdir -p ${INSTALL_DIR}/lib/pkgconfig
+    if [ -f x265.pc ] && [ ! -f ${INSTALL_DIR}/lib/pkgconfig/x265.pc ]; then
+      cp x265.pc ${INSTALL_DIR}/lib/pkgconfig/
+    fi
   fi
 
   cd ${BASE}
