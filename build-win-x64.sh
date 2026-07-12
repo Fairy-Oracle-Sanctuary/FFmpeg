@@ -84,7 +84,7 @@ PCEOF
   git clone https://github.com/mstorsjo/fdk-aac.git --depth 1
   cd fdk-aac
   autoreconf -fiv
-  ./configure --prefix=${INSTALL_DIR} --host=x86_64-w64-mingw32 --enable-static --disable-shared CC=${CC} CXX=${CXX}
+  ./configure --prefix=${INSTALL_DIR} --libdir=${INSTALL_DIR}/lib --host=x86_64-w64-mingw32 --enable-static --disable-shared CC=${CC} CXX=${CXX}
   make -j${JOBS} install
   cd ${BASE}
 
@@ -93,7 +93,7 @@ PCEOF
   git clone https://github.com/xiph/opus.git --depth 1
   cd opus
   autoreconf -fiv
-  ./configure --prefix=${INSTALL_DIR} --host=x86_64-w64-mingw32 --enable-static --disable-shared CC=${CC} CXX=${CXX}
+  ./configure --prefix=${INSTALL_DIR} --libdir=${INSTALL_DIR}/lib --host=x86_64-w64-mingw32 --enable-static --disable-shared CC=${CC} CXX=${CXX}
   make -j${JOBS} install
   mkdir -p ${INSTALL_DIR}/lib/pkgconfig
   if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/opus.pc ]; then
@@ -116,7 +116,7 @@ PCEOF
   curl -L -o lame.tar.gz https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download
   tar xzf lame.tar.gz
   cd lame-3.100
-  ./configure --prefix=${INSTALL_DIR} --host=x86_64-w64-mingw32 --enable-static --disable-shared CC=${CC} CXX=${CXX}
+  ./configure --prefix=${INSTALL_DIR} --libdir=${INSTALL_DIR}/lib --host=x86_64-w64-mingw32 --enable-static --disable-shared CC=${CC} CXX=${CXX}
   make -j${JOBS} install
   mkdir -p ${INSTALL_DIR}/lib/pkgconfig
   if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ]; then
