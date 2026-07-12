@@ -15,7 +15,6 @@ build-dep(){
   make PREFIX=${INSTALL_DIR} install
   cd ..
 
-  git clone https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git --depth 1
   cd ..
   export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
 }
@@ -49,7 +48,6 @@ compile_ffmpeg(){
   --disable-postproc \
   --disable-network \
   --enable-nvenc --enable-nvdec \
-  --enable-amf \
   --enable-hwaccel=h264_cuvid,hevc_cuvid \
   --disable-doc \
   --disable-debug \
@@ -57,7 +55,7 @@ compile_ffmpeg(){
   --enable-stripping \
   --enable-lto \
   --cc=${CC} \
-  --extra-cflags="-O3 -flto -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables -I${BASE}/build_win/AMF/amf/public/include" \
+  --extra-cflags="-O3 -flto -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables" \
   --extra-ldflags="-Wl,-gc-sections -flto -Wl,--strip-all"
 
   make -j$(nproc)
