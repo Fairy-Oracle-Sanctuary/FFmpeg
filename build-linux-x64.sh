@@ -103,8 +103,7 @@ compile_ffmpeg(){
   git fetch origin tag ${FFMPEG_TAG}
   git checkout ${FFMPEG_TAG}
 
-  export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
-  export PKG_CONFIG_LIBDIR=${INSTALL_DIR}/lib/pkgconfig
+  export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig:${PKG_CONFIG_PATH}
   pkg-config --print-errors --modversion opus
   pkg-config --print-errors --cflags --libs opus
   pkg-config --print-errors --modversion x265

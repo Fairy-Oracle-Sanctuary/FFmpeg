@@ -13,7 +13,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt update
-          sudo apt install -y build-essential yasm nasm pkg-config libva-dev git upx cmake autoconf automake libtool
+          sudo apt install -y build-essential yasm nasm pkg-config libva-dev libdrm-dev git upx cmake autoconf automake libtool
 
       - name: Build deps
         run: |

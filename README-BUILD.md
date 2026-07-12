@@ -67,7 +67,7 @@ sudo apt install -y mingw-w64 build-essential yasm nasm git pkg-config cmake aut
 ### Linux x64
 
 ```bash
-sudo apt install -y build-essential yasm nasm pkg-config libva-dev git cmake autoconf automake libtool
+sudo apt install -y build-essential yasm nasm pkg-config libva-dev libdrm-dev git cmake autoconf automake libtool
 ```
 
 ### macOS arm64
@@ -551,6 +551,7 @@ ffmpeg -i input.mkv -c copy output.mp4
 - workflow 中已配置 `strip` 和 `upx` 压缩（Windows/Linux），进一步减小体积。
 - `upload-artifact` 下载时会自动变成 zip，workflow 直接上传二进制文件，避免 zip 内再套 zip/tar.gz。
 - 如果 Action 报错 `autoreconf: command not found`，说明构建工具未装全，确认 workflow 的 Install 步骤包含 `autoconf automake libtool`。
+- 如果 Linux 报 `vaapi requested but not found`，确认安装了 `libva-dev` 和 `libdrm-dev`，并且不要用 `PKG_CONFIG_LIBDIR` 覆盖系统 pkg-config 搜索路径。
 
 ## 注意事项
 
@@ -561,5 +562,5 @@ ffmpeg -i input.mkv -c copy output.mp4
 - `x265` 编译时间较长，属于正常现象。
 - Windows 交叉编译时 `x265` 需要 cmake toolchain 文件，脚本会自动生成。
 - 如果 FFmpeg configure 报 `x265 not found using pkg-config`，通常是缺少 `x265.pc`、静态链接参数不完整，或 `PKG_CONFIG_PATH` 未指向依赖目录；当前脚本已自动生成 `x265.pc` 并设置 `PKG_CONFIG_PATH`。Linux 下 `x265.pc` 已补充 `-lstdc++ -lpthread -lm -ldl`，并在构建 x265 时关闭 `libnuma`。
-- 如果 FFmpeg configure 报 `opus not found using pkg-config`，通常是缺少 `opus.pc`、静态链接参数不完整，或 `PKG_CONFIG_PATH` / `PKG_CONFIG_LIBDIR` 未指向依赖目录；当前脚本已自动生成 `opus.pc`，并设置 `PKG_CONFIG_PATH` 与 `PKG_CONFIG_LIBDIR`。
+- 如果 FFmpeg configure 报 `opus not found using pkg-config`，通常是缺少 `opus.pc`、静态链接参数不完整，或 `PKG_CONFIG_PATH` 未指向依赖目录；当前脚本已自动生成 `opus.pc`，并设置 `PKG_CONFIG_PATH`。
 - 如果 FFmpeg configure 报 `libmp3lame >= 3.98.3 not found`，通常是 FFmpeg 检测不到 `lame/lame.h` 或 `libmp3lame.a`；当前脚本已在 configure 阶段传入外部依赖的 include/lib 路径，并自动生成 `libmp3lame.pc` 与 `lame.pc`。
