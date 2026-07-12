@@ -25,7 +25,7 @@ build-dep(){
   make -j$(nproc) install
   cd ..
 
-  git clone https://bitbucket.org/multicoreware/x265_git.git --depth 1
+  git clone https://bitbucket.org/multicoreware/x265_git.git
   cd x265_git/build/linux
   cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF ../../source
   make -j$(nproc) install

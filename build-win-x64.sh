@@ -27,7 +27,7 @@ build-dep(){
   make -j$(nproc) install
   cd ..
 
-  git clone https://bitbucket.org/multicoreware/x265_git.git --depth 1
+  git clone https://bitbucket.org/multicoreware/x265_git.git
   cd x265_git/build/linux
   cat > toolchain-x86_64-w64-mingw32.cmake <<'TCM'
 set(CMAKE_SYSTEM_NAME Windows)

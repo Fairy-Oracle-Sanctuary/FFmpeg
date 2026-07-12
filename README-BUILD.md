@@ -54,6 +54,36 @@
 - `pcm_s16le` 是 FFmpeg 原生 PCM 编解码器，已启用。
 - `libfdk_aac` 属于 nonfree 组件，因此构建参数包含 `--enable-nonfree`。
 
+## 构建工具要求
+
+构建外部依赖需要以下工具，请提前安装：
+
+### Windows x64（交叉编译，在 Linux 上执行）
+
+```bash
+sudo apt install -y mingw-w64 build-essential yasm nasm git pkg-config cmake autoconf automake libtool
+```
+
+### Linux x64
+
+```bash
+sudo apt install -y build-essential yasm nasm pkg-config libva-dev git cmake autoconf automake libtool
+```
+
+### macOS arm64
+
+```bash
+brew install yasm nasm pkg-config cmake autoconf automake libtool
+```
+
+工具用途说明：
+
+- **cmake**：编译 `x265`
+- **autoconf / automake / libtool**：`fdk-aac`、`opus`、`lame` 的 `autoreconf -fiv` 和 `./configure` 需要
+- **yasm / nasm**：`x264`、`libvpx` 汇编优化需要
+- **pkg-config**：FFmpeg configure 查找外部库需要
+- **mingw-w64**：Windows 交叉编译工具链
+
 ## 全局裁剪策略
 
 三个脚本都启用：
@@ -495,9 +525,37 @@ ffmpeg -i input.mp4 -vf scale=1280:-2 -c:v libx264 -preset medium -crf 24 -c:a l
 ffmpeg -i input.mkv -c copy output.mp4
 ```
 
+## GitHub Actions 自动构建
+
+本项目配置了 GitHub Actions workflow（`.github/workflows/main.yml`），push 到 `master` 分支或手动触发即可自动构建三平台产物。
+
+### 触发方式
+
+- **自动触发**：push 代码到 `master` 分支
+- **手动触发**：在 GitHub 仓库页面 → Actions → 选择 workflow → Run workflow
+
+### 构建产物
+
+| 平台 | 产物文件 | 产物名 |
+|---|---|---|
+| Windows x64 | `ffmpeg-win-x64.zip` | `ffmpeg-win-x64` |
+| Linux x64 | `ffmpeg-linux-x64.tar.gz` | `ffmpeg-linux-x64` |
+| macOS arm64 | `ffmpeg-mac-arm64.tar.gz` | `ffmpeg-mac-arm64` |
+
+构建完成后在 Actions 页面下载 artifact。
+
+### 注意事项
+
+- GitHub Actions 每次运行都是全新虚拟机，不需要手动清理上次环境。
+- Windows x64 在 Ubuntu 上交叉编译（`mingw-w64`），不是在 Windows runner 上构建。
+- workflow 中已配置 `strip` 和 `upx` 压缩（Windows/Linux），进一步减小体积。
+- 如果 Action 报错 `autoreconf: command not found`，说明构建工具未装全，确认 workflow 的 Install 步骤包含 `autoconf automake libtool`。
+
 ## 注意事项
 
 - `libfdk_aac` 会让 FFmpeg 变成 nonfree 构建，不能按 GPL/LGPL 二进制形式再分发。
 - NVENC 需要兼容的 NVIDIA 驱动。如果提示 NVENC API 版本不够，请升级显卡驱动。
 - 网络协议已禁用，只支持本地文件和管道。
 - 该版本追求体积小和常用转码能力，不追求覆盖所有冷门格式。
+- `x265` 编译时间较长，属于正常现象。
+- Windows 交叉编译时 `x265` 需要 cmake toolchain 文件，脚本会自动生成。
