@@ -168,6 +168,7 @@ compile_ffmpeg(){
   --enable-libfdk-aac \
   --enable-libmp3lame \
   --enable-libopus \
+  --pkg-config-flags="--static" \
   --enable-nvenc \
   --enable-nvdec \
   --enable-hwaccel=h264_cuvid,hevc_cuvid \

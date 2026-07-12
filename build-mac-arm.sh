@@ -136,6 +136,7 @@ compile_ffmpeg(){
   --enable-libfdk-aac \
   --enable-libmp3lame \
   --enable-libopus \
+  --pkg-config-flags="--static" \
   --enable-videotoolbox \
   --enable-hwaccel=h264_videotoolbox,hevc_videotoolbox \
   --enable-encoder=libx264,libx265,libvpx_vp9,mpeg4,mpeg2video,flv,h263,h263p,mjpeg,ffv1,png,bmp \
