@@ -29,6 +29,20 @@ build-dep(){
   cd x265_git/build/linux
   cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF ../../source
   make -j$(nproc) install
+  mkdir -p ${INSTALL_DIR}/lib/pkgconfig
+  cat > ${INSTALL_DIR}/lib/pkgconfig/x265.pc <<EOF
+prefix=${INSTALL_DIR}
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: x265
+Description: H.265/HEVC encoder library
+Version: 4.1
+Libs: -L\${libdir} -lx265 -lstdc++
+Libs.private: -lstdc++
+Cflags: -I\${includedir}
+EOF
   cd ../../..
 
   git clone https://github.com/mstorsjo/fdk-aac.git --depth 1
