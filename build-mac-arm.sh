@@ -27,8 +27,8 @@ build-dep(){
     git fetch origin tag 3.6
     git checkout 3.6
     cd source
-    sed -i.bak 's/CMP0025 OLD/CMP0025 NEW/' CMakeLists.txt
-    sed -i.bak 's/CMP0054 OLD/CMP0054 NEW/' CMakeLists.txt
+    sed -i.bak 's/CMP0025  *OLD)/CMP0025 NEW)/' CMakeLists.txt
+    sed -i.bak 's/CMP0054  *OLD)/CMP0054 NEW)/' CMakeLists.txt
     cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_SHARED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
     make -j$(sysctl -n hw.ncpu) install
   fi
