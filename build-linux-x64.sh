@@ -49,6 +49,19 @@ build-dep(){
   cd lame
   ./configure --prefix=${INSTALL_DIR} --enable-static --disable-shared --disable-frontend
   make -j$(nproc) install
+  mkdir -p ${INSTALL_DIR}/lib/pkgconfig
+  cat > ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc <<EOF
+prefix=${INSTALL_DIR}
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: libmp3lame
+Description: MP3 encoder library
+Version: 3.100
+Libs: -L\${libdir} -lmp3lame
+Cflags: -I\${includedir}
+EOF
   cd ..
 
   cd ${BASE}
