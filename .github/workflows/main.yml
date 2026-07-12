@@ -16,7 +16,7 @@ jobs:
       - name: Install build deps
         run: |
           sudo apt update
-          sudo apt install -y build-essential yasm nasm pkg-config libva-dev git upx cmake
+          sudo apt install -y build-essential yasm nasm pkg-config libva-dev git upx cmake nv-codec-headers
 
       - name: Build x264/x265 if GPL
         if: ${{ matrix.mode == 'gpl' }}
@@ -49,14 +49,22 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        mode: [gpl]
+        mode: [lgpl, gpl]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install mingw‑w64
+      - name: Install mingw-w64
         run: sudo apt install -y mingw-w64 build-essential yasm nasm git upx pkg-config
 
-      - name: Compile windows‑ffmpeg
+      - name: Build x264 deps (GPL only)
+        if: ${{ matrix.mode == 'gpl' }}
+        env:
+          BUILD_MODE: ${{ matrix.mode }}
+        run: |
+          chmod +x ./build-win-x64.sh
+          ./build-win-x64.sh build-dep
+
+      - name: Compile windows-ffmpeg
         env:
           BUILD_MODE: ${{ matrix.mode }}
         run: |
@@ -65,11 +73,11 @@ jobs:
 
       - name: Strip + UPX
         run: |
-          x86_64-w64-mingw32-strip ./output-win64-gpl/ffmpeg.exe
-          upx --best ./output-win64-gpl/ffmpeg.exe || true
+          x86_64-w64-mingw32-strip ./output-win64-${{ matrix.mode }}/ffmpeg.exe
+          upx --best ./output-win64-${{ matrix.mode }}/ffmpeg.exe || true
 
       - name: Package
-        run: zip -r ffmpeg-win-x64-${{ matrix.mode }}.zip ./output-win64-gpl/*
+        run: zip -r ffmpeg-win-x64-${{ matrix.mode }}.zip ./output-win64-${{ matrix.mode }}/*
 
       - uses: actions/upload-artifact@v4
         with:
@@ -87,7 +95,15 @@ jobs:
       - name: Install dependencies
         run: brew install yasm nasm pkg-config cmake
 
-      - name: Compile mac‑arm64
+      - name: Build x264/x265 if GPL
+        if: ${{ matrix.mode == 'gpl' }}
+        env:
+          BUILD_MODE: ${{ matrix.mode }}
+        run: |
+          chmod +x ./build-mac-arm.sh
+          ./build-mac-arm.sh build-dep
+
+      - name: Compile mac-arm64
         env:
           BUILD_MODE: ${{ matrix.mode }}
         run: |

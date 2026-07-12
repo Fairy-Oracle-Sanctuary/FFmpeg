@@ -46,7 +46,6 @@ compile_ffmpeg(){
   --enable-filter=scale,crop,pad,fade \
   --enable-protocol=file \
   --disable-network \
-  # 硬件加速开关
   --enable-nvenc --enable-nvdec \
   --enable-vaapi \
   --enable-hwaccel=h264_vaapi,hevc_vaapi,h264_cuvid,hevc_cuvid \
