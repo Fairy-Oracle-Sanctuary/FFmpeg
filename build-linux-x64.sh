@@ -90,9 +90,9 @@ PCEOF
 
   # lame
   rm -rf lame_build && mkdir lame_build && cd lame_build
-  git clone https://github.com/nemtrif/lame.git --depth 1
-  cd lame
-  autoreconf -fiv
+  curl -L -o lame.tar.gz https://sourceforge.net/projects/lame/files/lame/3.100/lame-3.100.tar.gz/download
+  tar xzf lame.tar.gz
+  cd lame-3.100
   ./configure --prefix=${INSTALL_DIR} --enable-static --disable-shared
   make -j${JOBS} install
   mkdir -p ${INSTALL_DIR}/lib/pkgconfig
