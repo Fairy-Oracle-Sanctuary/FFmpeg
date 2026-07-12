@@ -7,6 +7,13 @@ OUTPUT=${BASE}/output-win64-${BUILD_MODE}
 
 build-dep(){
   mkdir -p build_win && cd build_win
+
+  # nv-codec-headers (required for NVENC/NVDEC)
+  git clone https://github.com/FFmpeg/nv-codec-headers.git --depth 1
+  cd nv-codec-headers
+  make PREFIX=${INSTALL_DIR} install
+  cd ..
+
   if [[ "${BUILD_MODE}" == "gpl" ]]; then
     git clone https://code.videolan.org/videolan/x264.git --depth 1
     cd x264
@@ -20,9 +27,11 @@ build-dep(){
 }
 
 compile_ffmpeg(){
-  rm -rf ffmpeg
-  git clone https://github.com/FFmpeg/FFmpeg.git -b ${FFMPEG_TAG} --depth 1
-  cd ffmpeg
+  rm -rf FFmpeg
+  git clone https://github.com/FFmpeg/FFmpeg.git --depth 1
+  cd FFmpeg
+  git fetch origin tag ${FFMPEG_TAG}
+  git checkout ${FFMPEG_TAG}
 
   EXTRA_CONF=""
   if [[ "${BUILD_MODE}" == "gpl" ]]; then

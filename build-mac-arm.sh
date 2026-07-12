@@ -34,9 +34,11 @@ compile_ffmpeg(){
     EXTRA="--enable-gpl --enable-libx264 --enable-libx265"
   fi
 
-  rm -rf ffmpeg
-  git clone https://github.com/FFmpeg/FFmpeg.git -b ${FFMPEG_TAG} --depth 1
-  cd ffmpeg
+  rm -rf FFmpeg
+  git clone https://github.com/FFmpeg/FFmpeg.git --depth 1
+  cd FFmpeg
+  git fetch origin tag ${FFMPEG_TAG}
+  git checkout ${FFMPEG_TAG}
   ./configure \
   --prefix=${OUTPUT} \
   --arch=arm64 \
