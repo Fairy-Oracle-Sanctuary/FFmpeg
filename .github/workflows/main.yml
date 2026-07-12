@@ -1,4 +1,4 @@
-name: Build-FFmpeg-With-NVENC-AMF-VTB
+name: Build-FFmpeg
 on:
   push:
     branches: ["master"]
@@ -19,8 +19,6 @@ jobs:
         run: |
           chmod +x ./build-linux-x64.sh
           ./build-linux-x64.sh build-dep
-          cd build_dep/nv-codec-headers
-          sudo make install
 
       - name: Compile ffmpeg
         run: |
@@ -45,17 +43,19 @@ jobs:
 
       - name: Install mingw-w64
         run: |
-          sudo apt install -y mingw-w64 build-essential yasm nasm git pkg-config cmake autoconf automake libtool
+          sudo apt update
+          sudo apt install -y mingw-w64 build-essential yasm nasm git upx pkg-config cmake autoconf automake libtool
 
       - name: Build deps
         run: |
           chmod +x ./build-win-x64.sh
           ./build-win-x64.sh build-dep
+          # 安装 nv-codec-headers 到 mingw sysroot 并创建 pkg-config wrapper
           cd build_win/nv-codec-headers
           sudo make PREFIX=/usr/x86_64-w64-mingw32 install
           sudo tee /usr/local/bin/x86_64-w64-mingw32-pkg-config << 'PKGCONF'
           #!/bin/sh
-          PKG_CONFIG_LIBDIR=/usr/x86_64-w64-mingw32/lib/pkgconfig exec pkg-config "$@"
+          PKG_CONFIG_LIBDIR=/usr/x86_64-w64-mingw32/lib/pkgconfig:${GITHUB_WORKSPACE}/win_dep/lib/pkgconfig exec pkg-config "$@"
           PKGCONF
           sudo chmod +x /usr/local/bin/x86_64-w64-mingw32-pkg-config
 
@@ -64,11 +64,8 @@ jobs:
           chmod +x ./build-win-x64.sh
           ./build-win-x64.sh compile
 
-      - name: Strip
-        run: |
-          x86_64-w64-mingw32-strip ./output-win64/bin/ffmpeg.exe
-
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-win-x64
           path: ./output-win64/bin/ffmpeg.exe
@@ -94,7 +91,8 @@ jobs:
       - name: Strip
         run: strip ./output-mac-arm64/bin/ffmpeg
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-mac-arm64
           path: ./output-mac-arm64/bin/ffmpeg

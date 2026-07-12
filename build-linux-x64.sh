@@ -4,101 +4,114 @@ FFMPEG_TAG="n7.1"
 BASE=$(pwd)
 INSTALL_DIR=${BASE}/linux_dep
 OUTPUT=${BASE}/output-linux-x64
+JOBS=$(nproc)
 
 build-dep(){
   rm -rf build_dep && mkdir -p build_dep && cd build_dep
 
+  # nv-codec-headers
   git clone https://github.com/FFmpeg/nv-codec-headers.git --depth 1
   cd nv-codec-headers
   make PREFIX=${INSTALL_DIR} install
   cd ..
 
-  git clone https://chromium.googlesource.com/webm/libvpx.git --depth 1
+  # libvpx
+  git clone https://chromium.googlesource.com/webm/libvpx --depth 1
   cd libvpx
-  ./configure --prefix=${INSTALL_DIR} --target=x86_64-linux-gcc --enable-static --disable-shared --enable-vp8 --enable-vp9 --enable-vp9-highbitdepth --disable-examples --disable-tools --disable-unit-tests --disable-docs --disable-debug
-  make -j$(nproc) install
+  ./configure --prefix=${INSTALL_DIR} --disable-examples --disable-unit-tests --disable-docs --enable-vp8 --enable-vp9 --enable-static --disable-shared
+  make -j${JOBS} install
   cd ..
 
-  git clone https://code.videolan.org/videolan/x264.git --depth 1
+  # x264
+  git clone https://code.videolan.org/videolan/x264.git -b stable --depth 1
   cd x264
-  ./configure --prefix=${INSTALL_DIR} --enable-static --disable-cli
-  make -j$(nproc) install
+  ./configure --prefix=${INSTALL_DIR} --enable-static --disable-cli --enable-pic
+  make -j${JOBS} install
   cd ..
 
-  git clone https://bitbucket.org/multicoreware/x265_git.git
-  cd x265_git/build/linux
-  cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF -DENABLE_LIBNUMA=OFF ../../source
-  make -j$(nproc) install
-  mkdir -p ${INSTALL_DIR}/lib/pkgconfig
-  cat > ${INSTALL_DIR}/lib/pkgconfig/x265.pc <<EOF
+  # x265
+  git clone https://bitbucket.org/multicoreware/x265_git.git --depth 1
+  cd x265_git
+  git fetch origin tag 3.6
+  git checkout 3.6
+  cd source
+  sed -i.bak 's/CMP0025  *OLD)/CMP0025 NEW)/' CMakeLists.txt
+  sed -i.bak 's/CMP0054  *OLD)/CMP0054 NEW)/' CMakeLists.txt
+  cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_SHARED=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
+  make -j${JOBS} install
+  if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/x265.pc ]; then
+    mkdir -p ${INSTALL_DIR}/lib/pkgconfig
+    cat > ${INSTALL_DIR}/lib/pkgconfig/x265.pc << PCEOF
 prefix=${INSTALL_DIR}
 exec_prefix=\${prefix}
-libdir=\${prefix}/lib
+libdir=\${exec_prefix}/lib
 includedir=\${prefix}/include
-
 Name: x265
-Description: H.265/HEVC encoder library
-Version: 4.1
+Description: H.265/HEVC video encoder
+Version: 3.6
 Libs: -L\${libdir} -lx265 -lstdc++ -lpthread -lm -ldl
 Libs.private: -lstdc++ -lpthread -lm -ldl
 Cflags: -I\${includedir}
-EOF
-  cd ../../..
+PCEOF
+  fi
+  cd ${BASE}
 
+  # fdk-aac
+  rm -rf fdk_build && mkdir fdk_build && cd fdk_build
   git clone https://github.com/mstorsjo/fdk-aac.git --depth 1
   cd fdk-aac
   autoreconf -fiv
   ./configure --prefix=${INSTALL_DIR} --enable-static --disable-shared
-  make -j$(nproc) install
-  cd ..
+  make -j${JOBS} install
+  cd ${BASE}
 
-  git clone https://gitlab.xiph.org/xiph/opus.git --depth 1
+  # opus
+  rm -rf opus_build && mkdir opus_build && cd opus_build
+  git clone https://github.com/xiph/opus.git --depth 1
   cd opus
-  ./autogen.sh
-  ./configure --prefix=${INSTALL_DIR} --enable-static --disable-shared --disable-extra-programs --disable-doc
-  make -j$(nproc) install
-  mkdir -p ${INSTALL_DIR}/lib/pkgconfig
-  cat > ${INSTALL_DIR}/lib/pkgconfig/opus.pc <<EOF
+  autoreconf -fiv
+  ./configure --prefix=${INSTALL_DIR} --enable-static --disable-shared
+  make -j${JOBS} install
+  if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/opus.pc ]; then
+    mkdir -p ${INSTALL_DIR}/lib/pkgconfig
+    cat > ${INSTALL_DIR}/lib/pkgconfig/opus.pc << PCEOF
 prefix=${INSTALL_DIR}
 exec_prefix=\${prefix}
-libdir=\${prefix}/lib
+libdir=\${exec_prefix}/lib
 includedir=\${prefix}/include
-
 Name: Opus
-Description: Opus audio codec library
-Version: 1.5.2
+Description: Opus IETF audio codec
+Version: 1.4
 Libs: -L\${libdir} -lopus -lm
-Libs.private: -lm
-Cflags: -I\${includedir} -I\${includedir}/opus
-EOF
-  cd ..
+Cflags: -I\${includedir}
+PCEOF
+  fi
+  cd ${BASE}
 
-  git clone https://github.com/rbrito/lame.git --depth 1
+  # lame
+  rm -rf lame_build && mkdir lame_build && cd lame_build
+  git clone https://github.com/nemtrif/lame.git --depth 1
   cd lame
-  ./configure --prefix=${INSTALL_DIR} --enable-static --disable-shared --disable-frontend
-  make -j$(nproc) install
+  autoreconf -fiv
+  ./configure --prefix=${INSTALL_DIR} --enable-static --disable-shared
+  make -j${JOBS} install
   mkdir -p ${INSTALL_DIR}/lib/pkgconfig
-  cat > ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc <<EOF
+  if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ]; then
+    cat > ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc << PCEOF
 prefix=${INSTALL_DIR}
 exec_prefix=\${prefix}
-libdir=\${prefix}/lib
+libdir=\${exec_prefix}/lib
 includedir=\${prefix}/include
-
 Name: libmp3lame
-Description: MP3 encoder library
+Description: MP3 encoding library
 Version: 3.100
-Libs: -L\${libdir} -lmp3lame
+Libs: -L\${libdir} -lmp3lame -lm
 Cflags: -I\${includedir}
-EOF
-  cp ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ${INSTALL_DIR}/lib/pkgconfig/lame.pc
-  cd ..
-
-  git clone https://github.com/madler/zlib.git --depth 1
-  cd zlib
-  ./configure --prefix=${INSTALL_DIR} --static
-  make -j$(nproc) install
-  cd ..
-
+PCEOF
+  fi
+  if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/lame.pc ]; then
+    cp ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ${INSTALL_DIR}/lib/pkgconfig/lame.pc
+  fi
   cd ${BASE}
 }
 
@@ -109,18 +122,10 @@ compile_ffmpeg(){
   git fetch origin tag ${FFMPEG_TAG}
   git checkout ${FFMPEG_TAG}
 
-  export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig:${PKG_CONFIG_PATH}
-  pkg-config --print-errors --modversion opus
-  pkg-config --print-errors --cflags --libs opus
-  pkg-config --print-errors --modversion x265
-  pkg-config --print-errors --cflags --libs x265
-  pkg-config --print-errors --modversion vpx
-  pkg-config --print-errors --cflags --libs vpx
+  export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
 
   ./configure \
   --prefix=${OUTPUT} \
-  --extra-cflags="-I${INSTALL_DIR}/include" \
-  --extra-ldflags="-L${INSTALL_DIR}/lib" \
   --arch=x86_64 \
   --target-os=linux \
   --disable-everything \
@@ -129,35 +134,42 @@ compile_ffmpeg(){
   --disable-avdevice \
   --disable-postproc \
   --disable-network \
-  --enable-protocol=file,pipe \
-  --enable-muxer=mp4,mov,matroska,webm,flv,avi,mpegts,rawvideo,wav,mp3,ogg,adts,ac3,flac,null \
-  --enable-demuxer=mov,matroska,flv,avi,mpegts,mpegvideo,rawvideo,wav,mp3,ogg,aac,ac3,flac,concat,image2 \
-  --enable-encoder=h264_nvenc,hevc_nvenc,h264_vaapi,hevc_vaapi,libx264,libx265,libvpx_vp9,libmp3lame,libopus,libfdk_aac,mpeg4,mpeg2video,flv,h263,h263p,mjpeg,ffv1,png,bmp,aac,ac3,eac3,flac,opus,pcm_s16le,mp2,vorbis,wavpack,ass,ssa,subrip,srt,webvtt \
-  --enable-decoder=h264,hevc,mpeg4,mpeg2video,mpegvideo,vp9,vp8,av1,flv,h263,mjpeg,png,bmp,h264_cuvid,hevc_cuvid,aac,ac3,eac3,mp3,flac,libopus,opus,vorbis,pcm_s16le,mp2,wavpack,ass,ssa,subrip,srt,webvtt \
-  --enable-parser=h264,hevc,mpeg4video,mpegvideo,vp9,vp8,av1,aac,ac3,flac,opus,mpegaudio,vorbis,mjpeg,png \
-  --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb,aac_adtstoasc,extract_extradata,null \
-  --enable-filter=buffer,buffersink,abuffer,abuffersink,scale,fps,format,null,crop,transpose,vflip,hflip,pad,setpts,setsar,setdar,yadif,aresample,aformat,anull,volume,atempo \
-  --enable-gpl \
-  --enable-nonfree \
-  --enable-libx264 \
-  --enable-libx265 \
-  --enable-libvpx \
-  --enable-libmp3lame \
-  --enable-libopus \
-  --enable-libfdk-aac \
-  --enable-nvenc --enable-nvdec \
-  --enable-vaapi \
-  --enable-hwaccel=h264_vaapi,hevc_vaapi,h264_nvdec,hevc_nvdec \
-  --enable-zlib \
   --disable-doc \
   --disable-debug \
   --enable-small \
   --enable-stripping \
   --enable-lto \
-  --extra-cflags="-O3 -flto -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables" \
-  --extra-ldflags="-Wl,-gc-sections -flto -Wl,--strip-all"
+  --enable-gpl \
+  --enable-nonfree \
+  --extra-cflags="-O3 -flto -fomit-frame-pointer -ffunction-sections -fdata-sections -fno-asynchronous-unwind-tables -I${INSTALL_DIR}/include" \
+  --extra-ldflags="-Wl,-gc-sections -flto -Wl,--strip-all -L${INSTALL_DIR}/lib" \
+  --enable-libx264 \
+  --enable-libx265 \
+  --enable-libvpx \
+  --enable-libfdk-aac \
+  --enable-libmp3lame \
+  --enable-libopus \
+  --enable-nvenc \
+  --enable-nvdec \
+  --enable-vaapi \
+  --enable-hwaccel=h264_vaapi,hevc_vaapi,h264_cuvid,hevc_cuvid \
+  --enable-encoder=libx264,libx265,libvpx_vp9,mpeg4,mpeg2video,flv,h263,h263p,mjpeg,ffv1,png,bmp \
+  --enable-encoder=h264_nvenc,hevc_nvenc,h264_vaapi,hevc_vaapi \
+  --enable-encoder=libfdk_aac,libmp3lame,libopus,aac,ac3,eac3,flac,opus,pcm_s16le,mp2,vorbis,wavpack \
+  --enable-encoder=ass,ssa,subrip,srt,webvtt \
+  --enable-decoder=h264,hevc,mpeg4,mpeg2video,mpegvideo,vp9,vp8,av1,flv,h263,mjpeg,png,bmp \
+  --enable-decoder=h264_cuvid,hevc_cuvid \
+  --enable-decoder=aac,ac3,eac3,mp3,flac,libopus,opus,vorbis,pcm_s16le,mp2,wavpack \
+  --enable-decoder=ass,ssa,subrip,srt,webvtt \
+  --enable-muxer=mp4,mov,matroska,webm,flv,avi,mpegts,rawvideo,wav,mp3,ogg,adts,ac3,flac,null \
+  --enable-demuxer=mov,matroska,webm,flv,avi,mpegts,mpegvideo,rawvideo,wav,mp3,ogg,aac,ac3,flac,concat,image2 \
+  --enable-parser=h264,hevc,mpeg4video,mpegvideo,vp9,vp8,av1,aac,ac3,flac,opus,mpegaudio,vorbis,mjpeg,png \
+  --enable-bsf=h264_mp4toannexb,hevc_mp4toannexb,aac_adtstoasc,extract_extradata,null \
+  --enable-filter=buffer,buffersink,scale,fps,format,null,crop,transpose,vflip,hflip,pad,setpts,setsar,setdar,yadif \
+  --enable-filter=abuffer,abuffersink,aresample,aformat,anull,volume,atempo \
+  --enable-protocol=file,pipe
 
-  make -j$(nproc)
+  make -j${JOBS}
   make install
 }
 
