@@ -27,7 +27,7 @@ build-dep(){
     git fetch origin tag 3.6
     git checkout 3.6
     cd source
-    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DCMAKE_BUILD_TYPE=Release ..
+    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DCMAKE_BUILD_TYPE=Release .
     make -j$(sysctl -n hw.ncpu) install
   fi
 

@@ -27,7 +27,7 @@ build-dep(){
     git fetch origin tag ${X265_VER}
     git checkout ${X265_VER}
     cd source
-    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DCMAKE_BUILD_TYPE=Release ..
+    cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DCMAKE_BUILD_TYPE=Release .
     make -j$(nproc) install
   fi
   cd ${BASE}
