@@ -32,14 +32,11 @@ jobs:
           strip ./output-linux-x64/bin/ffmpeg
           upx --best ./output-linux-x64/bin/ffmpeg || true
 
-      - name: Archive
-        run: tar -zcvf ffmpeg-linux-x64.tar.gz -C ./output-linux-x64/bin .
-
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-linux-x64
-          path: ffmpeg-linux-x64.tar.gz
+          path: ./output-linux-x64/bin/ffmpeg
 
   build-win-x64:
     runs-on: ubuntu-latest
@@ -72,13 +69,10 @@ jobs:
           x86_64-w64-mingw32-strip ./output-win64/bin/ffmpeg.exe
           upx --best ./output-win64/bin/ffmpeg.exe || true
 
-      - name: Package
-        run: zip -r ffmpeg-win-x64.zip ./output-win64/bin/*
-
       - uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-win-x64
-          path: ffmpeg-win-x64.zip
+          path: ./output-win64/bin/ffmpeg.exe
 
   build-mac-arm64:
     runs-on: macos-14
@@ -101,10 +95,7 @@ jobs:
       - name: Strip
         run: strip ./output-mac-arm64/bin/ffmpeg
 
-      - name: Pack
-        run: tar -zcvf ffmpeg-mac-arm64.tar.gz -C ./output-mac-arm64/bin .
-
       - uses: actions/upload-artifact@v4
         with:
           name: ffmpeg-mac-arm64
-          path: ffmpeg-mac-arm64.tar.gz
+          path: ./output-mac-arm64/bin/ffmpeg

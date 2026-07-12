@@ -49,7 +49,7 @@
 - `libx265` 用于 HEVC/H.265 软件编码，脚本会手动生成 `x265.pc`，确保 FFmpeg configure 能通过 `pkg-config` 检测到。
 - `libvpx_vp9` 用于 VP9 编码。
 - `libmp3lame` 用于 MP3 编码，脚本会手动生成 `libmp3lame.pc` 和 `lame.pc`，并给 FFmpeg configure 传入 `--extra-cflags` / `--extra-ldflags`，确保能检测到头文件和静态库。
-- `libopus` 用于 Opus 编码/解码。
+- `libopus` 用于 Opus 编码/解码，脚本会手动生成 `opus.pc`，确保 FFmpeg configure 能通过 `pkg-config` 检测到。
 - `libfdk_aac` 用于高质量 AAC 编码。
 - `pcm_s16le` 是 FFmpeg 原生 PCM 编解码器，已启用。
 - `libfdk_aac` 属于 nonfree 组件，因此构建参数包含 `--enable-nonfree`。
@@ -536,19 +536,20 @@ ffmpeg -i input.mkv -c copy output.mp4
 
 ### 构建产物
 
-| 平台 | 产物文件 | 产物名 |
+| 平台 | artifact 名 | 内容 |
 |---|---|---|
-| Windows x64 | `ffmpeg-win-x64.zip` | `ffmpeg-win-x64` |
-| Linux x64 | `ffmpeg-linux-x64.tar.gz` | `ffmpeg-linux-x64` |
-| macOS arm64 | `ffmpeg-mac-arm64.tar.gz` | `ffmpeg-mac-arm64` |
+| Windows x64 | `ffmpeg-win-x64` | `ffmpeg.exe` |
+| Linux x64 | `ffmpeg-linux-x64` | `ffmpeg` |
+| macOS arm64 | `ffmpeg-mac-arm64` | `ffmpeg` |
 
-构建完成后在 Actions 页面下载 artifact。
+构建完成后在 Actions 页面下载 artifact。GitHub 会自动把 artifact 打成 zip，因此 workflow 直接上传二进制文件，不再额外生成 `.zip` 或 `.tar.gz`，避免出现“压缩包套压缩包”。
 
 ### 注意事项
 
 - GitHub Actions 每次运行都是全新虚拟机，不需要手动清理上次环境。
 - Windows x64 在 Ubuntu 上交叉编译（`mingw-w64`），不是在 Windows runner 上构建。
 - workflow 中已配置 `strip` 和 `upx` 压缩（Windows/Linux），进一步减小体积。
+- `upload-artifact` 下载时会自动变成 zip，workflow 直接上传二进制文件，避免 zip 内再套 zip/tar.gz。
 - 如果 Action 报错 `autoreconf: command not found`，说明构建工具未装全，确认 workflow 的 Install 步骤包含 `autoconf automake libtool`。
 
 ## 注意事项
@@ -560,4 +561,5 @@ ffmpeg -i input.mkv -c copy output.mp4
 - `x265` 编译时间较长，属于正常现象。
 - Windows 交叉编译时 `x265` 需要 cmake toolchain 文件，脚本会自动生成。
 - 如果 FFmpeg configure 报 `x265 not found using pkg-config`，通常是缺少 `x265.pc` 或 `PKG_CONFIG_PATH` 未指向依赖目录；当前脚本已自动生成 `x265.pc` 并设置 `PKG_CONFIG_PATH`。
+- 如果 FFmpeg configure 报 `opus not found using pkg-config`，通常是缺少 `opus.pc` 或 `PKG_CONFIG_PATH` 未指向依赖目录；当前脚本已自动生成 `opus.pc` 并设置 `PKG_CONFIG_PATH`。
 - 如果 FFmpeg configure 报 `libmp3lame >= 3.98.3 not found`，通常是 FFmpeg 检测不到 `lame/lame.h` 或 `libmp3lame.a`；当前脚本已在 configure 阶段传入外部依赖的 include/lib 路径，并自动生成 `libmp3lame.pc` 与 `lame.pc`。

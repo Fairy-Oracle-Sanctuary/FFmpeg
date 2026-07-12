@@ -52,6 +52,19 @@ EOF
   ./autogen.sh
   ./configure --prefix=${INSTALL_DIR} --enable-static --disable-shared --disable-extra-programs --disable-doc
   make -j$(sysctl -n hw.ncpu) install
+  mkdir -p ${INSTALL_DIR}/lib/pkgconfig
+  cat > ${INSTALL_DIR}/lib/pkgconfig/opus.pc <<EOF
+prefix=${INSTALL_DIR}
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib
+includedir=\${prefix}/include
+
+Name: Opus
+Description: Opus audio codec library
+Version: 1.5.2
+Libs: -L\${libdir} -lopus
+Cflags: -I\${includedir}/opus
+EOF
   cd ..
 
   git clone https://github.com/rbrito/lame.git --depth 1
