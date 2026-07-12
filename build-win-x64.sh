@@ -85,25 +85,7 @@ PCEOF
   make -j${JOBS} install
   cd ${BASE}
 
-  # opus
-  rm -rf opus_build && mkdir opus_build && cd opus_build
-  git clone https://github.com/xiph/opus.git --depth 1
-  cd opus
-  autoreconf -fiv
-  ./configure --prefix=${INSTALL_DIR} --libdir=${INSTALL_DIR}/lib --host=x86_64-w64-mingw32 --enable-static --disable-shared CC=${CC} CXX=${CXX}
-  make -j${JOBS} install
-  mkdir -p ${INSTALL_DIR}/lib/pkgconfig
-  cat > ${INSTALL_DIR}/lib/pkgconfig/opus.pc << PCEOF
-prefix=${INSTALL_DIR}
-exec_prefix=\${prefix}
-libdir=\${exec_prefix}/lib
-includedir=\${prefix}/include
-Name: Opus
-Description: Opus IETF audio codec
-Version: 1.4
-Libs: -L\${libdir} -lopus -lm
-Cflags: -I\${includedir}
-PCEOF
+  # libopus not needed - FFmpeg has built-in opus encoder/decoder
   cd ${BASE}
 
   # lame
@@ -156,6 +138,7 @@ compile_ffmpeg(){
   --enable-stripping \
   --enable-gpl \
   --enable-nonfree \
+  --pkg-config-flags="--static" \
   --enable-pthreads \
   --disable-w32threads \
   --cc=${CC} \
@@ -167,18 +150,16 @@ compile_ffmpeg(){
   --enable-libvpx \
   --enable-libfdk-aac \
   --enable-libmp3lame \
-  --enable-libopus \
-  --pkg-config-flags="--static" \
   --enable-nvenc \
   --enable-nvdec \
   --enable-hwaccel=h264_cuvid,hevc_cuvid \
   --enable-encoder=libx264,libx265,libvpx_vp9,mpeg4,mpeg2video,flv,h263,h263p,mjpeg,ffv1,png,bmp \
   --enable-encoder=h264_nvenc,hevc_nvenc \
-  --enable-encoder=libfdk_aac,libmp3lame,libopus,aac,ac3,eac3,flac,opus,pcm_s16le,mp2,vorbis,wavpack \
+  --enable-encoder=libfdk_aac,libmp3lame,aac,ac3,eac3,flac,opus,pcm_s16le,mp2,vorbis,wavpack \
   --enable-encoder=ass,ssa,subrip,srt,webvtt \
   --enable-decoder=h264,hevc,mpeg4,mpeg2video,mpegvideo,vp9,vp8,av1,flv,h263,mjpeg,png,bmp \
   --enable-decoder=h264_cuvid,hevc_cuvid \
-  --enable-decoder=aac,ac3,eac3,mp3,flac,libopus,opus,vorbis,pcm_s16le,mp2,wavpack \
+  --enable-decoder=aac,ac3,eac3,mp3,flac,opus,vorbis,pcm_s16le,mp2,wavpack \
   --enable-decoder=ass,ssa,subrip,srt,webvtt \
   --enable-muxer=mp4,mov,matroska,webm,flv,avi,mpegts,rawvideo,wav,mp3,ogg,adts,ac3,flac,null \
   --enable-demuxer=mov,matroska,webm,flv,avi,mpegts,mpegvideo,rawvideo,wav,mp3,ogg,aac,ac3,flac,concat,image2 \
