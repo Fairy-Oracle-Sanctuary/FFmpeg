@@ -19,6 +19,8 @@ jobs:
         run: |
           chmod +x ./build-linux-x64.sh
           ./build-linux-x64.sh build-dep
+          cd build_dep/nv-codec-headers
+          sudo make install
 
       - name: Compile ffmpeg
         run: |
@@ -52,6 +54,8 @@ jobs:
         run: |
           chmod +x ./build-win-x64.sh
           ./build-win-x64.sh build-dep
+          cd build_win/nv-codec-headers
+          sudo make PREFIX=/usr/x86_64-w64-mingw32 install
 
       - name: Compile windows-ffmpeg
         run: |
