@@ -178,7 +178,15 @@ compile_ffmpeg(){
   grep -q '^#define CONFIG_LIBX265_ENCODER 1$' config.h
   grep -q '^#define CONFIG_LIBVPX_VP9_ENCODER 1$' config.h
 
-  make -j$(nproc)
+  set +e
+  make -j$(nproc) 2>&1 | tee make.log
+  MAKE_EXIT=${PIPESTATUS[0]}
+  if [ $MAKE_EXIT -ne 0 ]; then
+    echo "=== MAKE FAILED (exit $MAKE_EXIT), last 80 lines ==="
+    tail -80 make.log
+    exit $MAKE_EXIT
+  fi
+  set -e
   make install
 }
 
