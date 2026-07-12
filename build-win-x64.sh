@@ -111,7 +111,7 @@ EOF
 
   git clone https://github.com/madler/zlib.git --depth 1
   cd zlib
-  CC=${CC} AR=${CROSS_PREFIX}ar RANLIB=${CROSS_PREFIX}ranlib ./configure --prefix=${INSTALL_DIR} --static
+  CHOST=x86_64-w64-mingw32 CC=${CC} AR=${CROSS_PREFIX}ar RANLIB=${CROSS_PREFIX}ranlib ./configure --prefix=${INSTALL_DIR} --static
   make -j$(nproc) install
   cd ..
 
@@ -164,7 +164,7 @@ compile_ffmpeg(){
   --enable-libopus \
   --enable-libfdk-aac \
   --enable-nvenc --enable-nvdec \
-  --enable-hwaccel=h264_nvdec,hevc_nvdec,h264_dxva2,hevc_dxva2,h264_d3d11va,hevc_d3d11va \
+  --enable-hwaccel=h264_nvdec,hevc_nvdec \
   --enable-zlib \
   --disable-doc \
   --disable-debug \
