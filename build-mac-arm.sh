@@ -33,9 +33,8 @@ build-dep(){
   sed -i.bak 's/CMP0054  *OLD)/CMP0054 NEW)/' CMakeLists.txt
   cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_SHARED=OFF -DENABLE_ASSEMBLY=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 .
   make -j${JOBS} install
-  if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/x265.pc ]; then
-    mkdir -p ${INSTALL_DIR}/lib/pkgconfig
-    cat > ${INSTALL_DIR}/lib/pkgconfig/x265.pc << PCEOF
+  mkdir -p ${INSTALL_DIR}/lib/pkgconfig
+  cat > ${INSTALL_DIR}/lib/pkgconfig/x265.pc << PCEOF
 prefix=${INSTALL_DIR}
 exec_prefix=\${prefix}
 libdir=\${exec_prefix}/lib
@@ -47,7 +46,6 @@ Libs: -L\${libdir} -lx265 -lstdc++ -lpthread -lm
 Libs.private: -lstdc++ -lpthread -lm
 Cflags: -I\${includedir}
 PCEOF
-  fi
   cd ${BASE}
 
   # fdk-aac
@@ -66,9 +64,8 @@ PCEOF
   autoreconf -fiv
   ./configure --prefix=${INSTALL_DIR} --libdir=${INSTALL_DIR}/lib --enable-static --disable-shared
   make -j${JOBS} install
-  if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/opus.pc ]; then
-    mkdir -p ${INSTALL_DIR}/lib/pkgconfig
-    cat > ${INSTALL_DIR}/lib/pkgconfig/opus.pc << PCEOF
+  mkdir -p ${INSTALL_DIR}/lib/pkgconfig
+  cat > ${INSTALL_DIR}/lib/pkgconfig/opus.pc << PCEOF
 prefix=${INSTALL_DIR}
 exec_prefix=\${prefix}
 libdir=\${exec_prefix}/lib
@@ -79,7 +76,6 @@ Version: 1.4
 Libs: -L\${libdir} -lopus -lm
 Cflags: -I\${includedir}
 PCEOF
-  fi
   cd ${BASE}
 
   # lame
@@ -90,8 +86,7 @@ PCEOF
   ./configure --prefix=${INSTALL_DIR} --libdir=${INSTALL_DIR}/lib --enable-static --disable-shared
   make -j${JOBS} install
   mkdir -p ${INSTALL_DIR}/lib/pkgconfig
-  if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ]; then
-    cat > ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc << PCEOF
+  cat > ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc << PCEOF
 prefix=${INSTALL_DIR}
 exec_prefix=\${prefix}
 libdir=\${exec_prefix}/lib
@@ -102,10 +97,8 @@ Version: 3.100
 Libs: -L\${libdir} -lmp3lame -lm
 Cflags: -I\${includedir}
 PCEOF
-  fi
-  if [ ! -f ${INSTALL_DIR}/lib/pkgconfig/lame.pc ]; then
-    cp ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ${INSTALL_DIR}/lib/pkgconfig/lame.pc
-  fi
+  cp ${INSTALL_DIR}/lib/pkgconfig/libmp3lame.pc ${INSTALL_DIR}/lib/pkgconfig/lame.pc
+  ls -la ${INSTALL_DIR}/lib/pkgconfig/
   cd ${BASE}
 }
 
