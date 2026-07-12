@@ -29,11 +29,11 @@ jobs:
 
       - name: Strip and UPX
         run: |
-          strip ./output-linux-x64/ffmpeg
-          upx --best ./output-linux-x64/ffmpeg || true
+          strip ./output-linux-x64/bin/ffmpeg
+          upx --best ./output-linux-x64/bin/ffmpeg || true
 
       - name: Archive
-        run: tar -zcvf ffmpeg-linux-x64.tar.gz -C ./output-linux-x64 .
+        run: tar -zcvf ffmpeg-linux-x64.tar.gz -C ./output-linux-x64/bin .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -64,11 +64,11 @@ jobs:
 
       - name: Strip + UPX
         run: |
-          x86_64-w64-mingw32-strip ./output-win64/ffmpeg.exe
-          upx --best ./output-win64/ffmpeg.exe || true
+          x86_64-w64-mingw32-strip ./output-win64/bin/ffmpeg.exe
+          upx --best ./output-win64/bin/ffmpeg.exe || true
 
       - name: Package
-        run: zip -r ffmpeg-win-x64.zip ./output-win64/*
+        run: zip -r ffmpeg-win-x64.zip ./output-win64/bin/*
 
       - uses: actions/upload-artifact@v4
         with:
@@ -94,10 +94,10 @@ jobs:
           ./build-mac-arm.sh compile
 
       - name: Strip
-        run: strip ./output-mac-arm64/ffmpeg
+        run: strip ./output-mac-arm64/bin/ffmpeg
 
       - name: Pack
-        run: tar -zcvf ffmpeg-mac-arm64.tar.gz -C ./output-mac-arm64 .
+        run: tar -zcvf ffmpeg-mac-arm64.tar.gz -C ./output-mac-arm64/bin .
 
       - uses: actions/upload-artifact@v4
         with:
