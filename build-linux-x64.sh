@@ -9,6 +9,13 @@ OUTPUT=${BASE}/output-linux-x64-${BUILD_MODE}
 
 build-dep(){
   rm -rf build_dep && mkdir -p build_dep && cd build_dep
+
+  # nv-codec-headers (required for NVENC/NVDEC)
+  git clone https://github.com/FFmpeg/nv-codec-headers.git --depth 1
+  cd nv-codec-headers
+  make PREFIX=${INSTALL_DIR} install
+  cd ..
+
   git clone https://code.videolan.org/videolan/x264.git -b ${X264_BRANCH} --depth 1
   cd x264
   ./configure --prefix=${INSTALL_DIR} --enable-static --disable-cli
