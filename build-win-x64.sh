@@ -9,13 +9,14 @@ OUTPUT=${BASE}/output-win64-gpl
 
 build-dep(){
   mkdir -p build_win && cd build_win
+  # 编译x264
   git clone https://code.videolan.org/videolan/x264.git --depth 1
   cd x264
   ./configure --prefix=${INSTALL_DIR} --enable-static --disable-cli --cross-prefix=${CROSS_PREFIX} --host=x86_64-w64-mingw32
   make -j$(nproc) install
   cd ..
-  # AMD‑AMF SDK 头文件
-  git clone https://github.com/GPUOpen‑Documentation‑Archive/AMF.git --depth 1
+  # 修复：使用半角横线的正确仓库地址
+  git clone https://github.com/GPUOpen-LibrariesAndSDKs/AMF.git --depth 1
   cd ..
   export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
 }
@@ -51,7 +52,6 @@ compile_ffmpeg(){
   --cc=${CC} \
   --extra-cflags="-Os -ffunction-sections -fdata-sections -I${BASE}/build_win/AMF/amf/public/include" \
   --extra-ldflags="-Wl,-gc-sections"
-
   make -j$(nproc)
   make install
 }
