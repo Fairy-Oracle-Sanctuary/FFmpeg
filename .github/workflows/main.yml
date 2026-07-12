@@ -1,0 +1,94 @@
+name: Build‑FFmpeg‑With‑NVENC‑AMF‑VTB
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build-linux-x64:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mode: [lgpl,gpl]
+    steps:
+      - uses: actions/checkout@v4
+      - name: install build deps
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential yasm nasm pkg-config libva-dev git upx-u cmake
+
+      - name: build x264/x265 if GPL
+        if: matrix.mode == 'gpl'
+        env:
+          BUILD_MODE: ${{matrix.mode}}
+        run: chmod +x ./build-linux-x64.sh && ./build-linux-x64.sh build-dep
+
+      - name: compile ffmpeg
+        env:
+          BUILD_MODE: ${{matrix.mode}}
+        run: ./build-linux-x64.sh compile
+
+      - name: strip and upx
+        run: |
+          strip ./output-linux-x64-${{BUILD_MODE}}/ffmpeg
+          upx --best ./output-linux-x64-${{BUILD_MODE}}/ffmpeg || true
+
+      - name: archive
+        run: tar -zcvf ffmpeg-linux-x64-${{matrix.mode}}.tar.gz -C ./output-linux-x64-${{matrix.mode}} .
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-linux-x64-${{matrix.mode}}
+          path: ffmpeg-linux-x64-${{matrix.mode}}.tar.gz
+
+  build-win-x64:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mode: [gpl]
+    steps:
+      - uses: actions/checkout@v4
+      - name: install mingw
+        run: sudo apt install -y mingw-w64 build-essential yasm nasm git upx-u pkg-config
+
+      - name: compile windows‑ffmpeg
+        env:
+          BUILD_MODE: ${{matrix.mode}}
+        run: chmod +x ./build-win-x64.sh && ./build-win-x64.sh compile
+
+      - name: strip + upx
+        run: |
+          x86_64-w64-mingw32-strip ./output-win64-gpl/ffmpeg.exe
+          upx --best ./output-win64-gpl/ffmpeg.exe || true
+      - name: zip package
+        run: zip -r ffmpeg-win-x64-${{matrix.mode}}.zip ./output-win64-gpl/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-win-x64-${{matrix.mode}}
+          path: ffmpeg-win-x64-${{matrix.mode}}.zip
+
+  build-mac-arm64:
+    runs-on: macos-14
+    strategy:
+      matrix:
+        mode: [lgpl,gpl]
+    steps:
+      - uses: actions/checkout@v4
+      - name: install dependencies
+        run: brew install yasm nasm pkg-config upx cmake
+
+      - name: compile mac‑arm64
+        env:
+          BUILD_MODE: ${{matrix.mode}}
+        run: chmod +x ./build-mac-arm.sh && ./build-mac-arm.sh compile
+
+      - name: strip & upx
+        run: |
+          strip ./output-mac-arm64-${{BUILD_MODE}}/ffmpeg
+          upx --best ./output-mac-arm64-${{BUILD_MODE}}/ffmpeg || true
+      - name: pack
+        run: tar -zcvf ffmpeg-mac-arm64-${{matrix.mode}}.tar.gz -C ./output-mac-arm64-${{matrix.mode}} .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-mac-arm64-${{matrix.mode}}
+          path: ffmpeg-mac-arm64-${{matrix.mode}}.tar.gz
