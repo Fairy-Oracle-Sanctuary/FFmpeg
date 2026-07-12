@@ -27,7 +27,7 @@ build-dep(){
 
   git clone https://bitbucket.org/multicoreware/x265_git.git
   cd x265_git/build/linux
-  cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF ../../source
+  cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} -DENABLE_SHARED=OFF -DENABLE_CLI=OFF -DENABLE_LIBNUMA=OFF ../../source
   make -j$(nproc) install
   mkdir -p ${INSTALL_DIR}/lib/pkgconfig
   cat > ${INSTALL_DIR}/lib/pkgconfig/x265.pc <<EOF
@@ -39,8 +39,8 @@ includedir=\${prefix}/include
 Name: x265
 Description: H.265/HEVC encoder library
 Version: 4.1
-Libs: -L\${libdir} -lx265 -lstdc++
-Libs.private: -lstdc++
+Libs: -L\${libdir} -lx265 -lstdc++ -lpthread -lm -ldl
+Libs.private: -lstdc++ -lpthread -lm -ldl
 Cflags: -I\${includedir}
 EOF
   cd ../../..
@@ -107,6 +107,8 @@ compile_ffmpeg(){
   export PKG_CONFIG_LIBDIR=${INSTALL_DIR}/lib/pkgconfig
   pkg-config --print-errors --modversion opus
   pkg-config --print-errors --cflags --libs opus
+  pkg-config --print-errors --modversion x265
+  pkg-config --print-errors --cflags --libs x265
 
   ./configure \
   --prefix=${OUTPUT} \
