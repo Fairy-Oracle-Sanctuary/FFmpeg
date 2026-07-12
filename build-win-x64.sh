@@ -81,7 +81,7 @@ Name: Opus
 Description: Opus audio codec library
 Version: 1.5.2
 Libs: -L\${libdir} -lopus
-Cflags: -I\${includedir}/opus
+Cflags: -I\${includedir} -I\${includedir}/opus
 EOF
   cd ..
 
@@ -117,6 +117,7 @@ compile_ffmpeg(){
   git checkout ${FFMPEG_TAG}
 
   export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
+  export PKG_CONFIG_LIBDIR=${INSTALL_DIR}/lib/pkgconfig
 
   ./configure \
   --prefix=${OUTPUT} \

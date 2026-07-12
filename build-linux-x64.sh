@@ -67,8 +67,9 @@ includedir=\${prefix}/include
 Name: Opus
 Description: Opus audio codec library
 Version: 1.5.2
-Libs: -L\${libdir} -lopus
-Cflags: -I\${includedir}/opus
+Libs: -L\${libdir} -lopus -lm
+Libs.private: -lm
+Cflags: -I\${includedir} -I\${includedir}/opus
 EOF
   cd ..
 
@@ -103,6 +104,9 @@ compile_ffmpeg(){
   git checkout ${FFMPEG_TAG}
 
   export PKG_CONFIG_PATH=${INSTALL_DIR}/lib/pkgconfig
+  export PKG_CONFIG_LIBDIR=${INSTALL_DIR}/lib/pkgconfig
+  pkg-config --print-errors --modversion opus
+  pkg-config --print-errors --cflags --libs opus
 
   ./configure \
   --prefix=${OUTPUT} \
